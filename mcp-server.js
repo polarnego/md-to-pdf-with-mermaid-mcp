@@ -15,6 +15,8 @@ import fs from 'fs';
 import { convertMarkdownWithMermaidToPdf } from './md_mermaid_to_pdf.js';
 
 async function start() {
+  // Signal converter to be silent on stdout when running under MCP
+  process.env.MCP_SILENT = process.env.MCP_SILENT || '1';
   const server = new McpServer({ name: 'md-mermaid-to-pdf', version: '1.0.0' });
 
   server.tool(

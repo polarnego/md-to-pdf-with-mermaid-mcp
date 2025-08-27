@@ -13,7 +13,7 @@ import { execSync } from 'child_process';
 import { pathToFileURL } from 'url';
 
 function run(cmd) {
-  execSync(cmd, { stdio: 'inherit' });
+  execSync(cmd, { stdio: 'pipe' });
 }
 
 function ensureDir(p) {
@@ -78,7 +78,9 @@ export function convertMarkdownWithMermaidToPdf(inputMd, outputPdf) {
     }
   }
 
-  console.log(`PDF written: ${outputAbs}`);
+  if (!process.env.MCP_SILENT) {
+    console.log(`PDF written: ${outputAbs}`);
+  }
   return outputAbs;
 }
 
