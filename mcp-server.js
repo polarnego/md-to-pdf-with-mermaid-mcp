@@ -21,29 +21,35 @@ async function start() {
 
   await server.tool(
     'convert_markdown_to_pdf',
-    'Convert a Markdown file (with ```mermaid code blocks) to a PDF.',
+    '마크다운 파일을 PDF로 변환합니다. 마크다운 내부에 Mermaid 다이어그램이 포함되어 있어도 렌더링됩니다.',
     z.object({
-      inputPath: z.string().describe('Absolute path to input .md file'),
-      outputPath: z.string().describe('Absolute path to output .pdf file'),
+      inputPath: z.string().describe(
+        'PDF로 변환할 원본 마크다운(.md) 파일의 전체 절대 경로. 예시: /Users/test/report.md'
+      ),
+      outputPath: z.string().describe(
+        '생성될 PDF 파일이 저장될 전체 절대 경로. 생략 시 원본 파일명에 .pdf 확장자를 붙여 같은 폴더에 저장됩니다.'
+      ).optional(), // outputPath를 선택사항으로 변경
     }),
     async ({ inputPath, outputPath }) => {
-      if (!path.isAbsolute(inputPath) || !path.isAbsolute(outputPath)) {
-        throw new Error('inputPath and outputPath must be absolute paths.');
+      if (!path.isAbsolute(inputPath)) {
+        throw new Error('inputPath는 반드시 절대 경로여야 합니다.');
+      }
+      if (outputPath && !path.isAbsolute(outputPath)) {
+        throw new Error('outputPath가 제공될 경우, 반드시 절대 경로여야 합니다.');
       }
       if (!fs.existsSync(inputPath)) {
-        throw new Error(`Input file not found: ${inputPath}`);
+        throw new Error(`입력 파일을 찾을 수 없습니다: ${inputPath}`);
       }
 
-      const produced = convertMarkdownWithMermaidToPdf(inputPath, outputPath);
+      // outputPath가 없으면 기본값 생성
+      const finalOutputPath = outputPath || inputPath.replace(/\.md$/, '.pdf');
+
+      const produced = convertMarkdownWithMermaidToPdf(inputPath, finalOutputPath);
       return {
-        content: [{ type: 'text', text: `PDF written: ${produced}` }],
+        content: [{ type: 'text', text: `PDF 생성 완료: ${produced}` }],
       };
     }
   );
-
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
 
 // CLI mode: if two positional args are provided, run conversion and exit
 const cliArgs = process.argv.slice(2).filter(Boolean);
