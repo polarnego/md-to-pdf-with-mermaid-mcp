@@ -43,6 +43,24 @@ async function start() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  
+  // Keep server alive for MCP communication
+  // Listen for close events to gracefully shutdown
+  process.stdin.on('end', () => {
+    process.exit(0);
+  });
+  
+  process.stdin.on('close', () => {
+    process.exit(0);
+  });
+  
+  // Keep alive but allow graceful shutdown
+  await new Promise((resolve) => {
+    process.on('SIGTERM', resolve);
+    process.on('SIGINT', resolve);
+    // For npm/npx compatibility, also listen for stdin close
+    process.stdin.resume();
+  });
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
