@@ -21,7 +21,7 @@ async function start() {
 
   await server.tool(
     'convert_markdown_to_pdf',
-    '마크다운 파일을 PDF로 변환합니다. 마크다운 내부에 Mermaid 다이어그램이 포함되어 있어도 렌더링됩니다.',
+    '마크다운 파일(.md)을 PDF(.pdf)로 변환합니다. 마크다운 내부에 Mermaid 다이어그램이 포함되어 있어도 렌더링됩니다.',
     z.object({
       inputPath: z.string().describe(
         'PDF로 변환할 원본 마크다운(.md) 파일의 전체 절대 경로. 예시: /Users/test/report.md'
