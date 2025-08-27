@@ -51,6 +51,12 @@ async function start() {
     }
   );
 
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+
+
 // CLI mode: if two positional args are provided, run conversion and exit
 const cliArgs = process.argv.slice(2).filter(Boolean);
 
