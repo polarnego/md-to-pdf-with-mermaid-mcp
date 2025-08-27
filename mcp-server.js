@@ -22,14 +22,14 @@ async function start() {
   await server.tool(
     'convert_markdown_to_pdf',
     '마크다운 파일(.md)을 PDF(.pdf)로 변환합니다. 마크다운 내부에 Mermaid 다이어그램이 포함되어 있어도 렌더링됩니다.',
-    z.object({
+    {
       inputPath: z.string().describe(
         'PDF로 변환할 원본 마크다운(.md) 파일의 전체 절대 경로. 예시: /Users/test/report.md'
       ),
       outputPath: z.string().describe(
         '생성될 PDF 파일이 저장될 전체 절대 경로. 생략 시 원본 파일명에 .pdf 확장자를 붙여 같은 폴더에 저장됩니다.'
       ).optional(), // outputPath를 선택사항으로 변경
-    }),
+    },
     async ({ inputPath, outputPath }) => {
       if (!path.isAbsolute(inputPath)) {
         throw new Error('inputPath는 반드시 절대 경로여야 합니다.');
