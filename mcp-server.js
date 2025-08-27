@@ -19,7 +19,7 @@ async function start() {
   process.env.MCP_SILENT = process.env.MCP_SILENT || '1';
   const server = new McpServer({ name: 'md-mermaid-to-pdf', version: '1.0.0' });
 
-  server.tool(
+  await server.tool(
     'convert_markdown_to_pdf',
     'Convert a Markdown file (with ```mermaid code blocks) to a PDF.',
     z.object({
@@ -43,8 +43,6 @@ async function start() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  // Keep the process alive while waiting for MCP client over stdio
-  await new Promise(() => {});
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
