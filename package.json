@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf-with-mermaid-mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": false,
   "description": "MCP server that converts Markdown (with Mermaid) to PDF",
   "main": "mcp-server.js",

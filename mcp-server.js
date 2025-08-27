@@ -43,6 +43,8 @@ async function start() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  // Keep the process alive while waiting for MCP client over stdio
+  await new Promise(() => {});
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
