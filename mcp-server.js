@@ -6,8 +6,8 @@
  * This server communicates over stdio, suitable for MCP clients to run via npx.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import path from 'path';
 import fs from 'fs';
@@ -48,8 +48,8 @@ async function start() {
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
-const cliArgs = process.argv.slice(2);
-if (cliArgs.length >= 2 && !cliArgs[0].startsWith('-')) {
+const cliArgs = process.argv.slice(2).filter(Boolean);
+if (cliArgs.length >= 2) {
   const inputPath = cliArgs[0];
   const outputPath = cliArgs[1];
   Promise.resolve()
