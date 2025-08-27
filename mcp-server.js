@@ -65,9 +65,20 @@ async function start() {
 
 // CLI mode: if two positional args are provided, run conversion and exit
 const cliArgs = process.argv.slice(2).filter(Boolean);
+
+// Debug: log arguments for troubleshooting
+if (!process.env.MCP_SILENT) {
+  console.error(`DEBUG: process.argv = ${JSON.stringify(process.argv)}`);
+  console.error(`DEBUG: cliArgs = ${JSON.stringify(cliArgs)}`);
+  console.error(`DEBUG: cliArgs.length = ${cliArgs.length}`);
+}
+
 if (cliArgs.length >= 2) {
   const inputPath = cliArgs[0];
   const outputPath = cliArgs[1];
+  if (!process.env.MCP_SILENT) {
+    console.error(`DEBUG: Running CLI mode: ${inputPath} -> ${outputPath}`);
+  }
   Promise.resolve()
     .then(() => convertMarkdownWithMermaidToPdf(inputPath, outputPath))
     .then(() => process.exit(0))
@@ -76,6 +87,9 @@ if (cliArgs.length >= 2) {
       process.exit(1);
     });
 } else {
+  if (!process.env.MCP_SILENT) {
+    console.error(`DEBUG: Starting MCP server mode`);
+  }
   start().catch((err) => {
     console.error(err);
     process.exit(1);
