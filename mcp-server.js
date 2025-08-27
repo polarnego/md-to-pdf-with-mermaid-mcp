@@ -45,22 +45,53 @@ async function start() {
   await server.connect(transport);
   
   // Keep server alive for MCP communication
-  // Listen for close events to gracefully shutdown
-  process.stdin.on('end', () => {
-    process.exit(0);
-  });
-  
-  process.stdin.on('close', () => {
-    process.exit(0);
-  });
-  
-  // Keep alive but allow graceful shutdown
-  await new Promise((resolve) => {
-    process.on('SIGTERM', resolve);
-    process.on('SIGINT', resolve);
-    // For npm/npx compatibility, also listen for stdin close
+  // Different behavior for direct execution vs npx
+  if (process.env.npm_config_user_config || process.env.npm_execpath) {
+    // Running under npm/npx - use timeout-based approach
+    console.error("Running under npm/npx environment");
+    let lastActivity = Date.now();
+    
+    // Update activity on stdin data
+    process.stdin.on('data', () => {
+      lastActivity = Date.now();
+    });
+    
+    // Check for inactivity every 5 seconds
+    const inactivityCheck = setInterval(() => {
+      if (Date.now() - lastActivity > 30000) { // 30 seconds of inactivity
+        console.error("Shutting down due to inactivity");
+        process.exit(0);
+      }
+    }, 5000);
+    
+    // Cleanup on exit
+    process.on('SIGTERM', () => {
+      clearInterval(inactivityCheck);
+      process.exit(0);
+    });
+    process.on('SIGINT', () => {
+      clearInterval(inactivityCheck);
+      process.exit(0);
+    });
+    
     process.stdin.resume();
-  });
+  } else {
+    // Direct execution - use original approach
+    console.error("Running in direct execution mode");
+    process.stdin.on('end', () => {
+      process.exit(0);
+    });
+    
+    process.stdin.on('close', () => {
+      process.exit(0);
+    });
+    
+    await new Promise((resolve) => {
+      process.on('SIGTERM', resolve);
+      process.on('SIGINT', resolve);
+      process.stdin.resume();
+    });
+  }
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
