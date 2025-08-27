@@ -43,55 +43,6 @@ async function start() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  
-  // Keep server alive for MCP communication
-  // Different behavior for direct execution vs npx
-  if (process.env.npm_config_user_config || process.env.npm_execpath) {
-    // Running under npm/npx - use timeout-based approach
-    console.error("Running under npm/npx environment");
-    let lastActivity = Date.now();
-    
-    // Update activity on stdin data
-    process.stdin.on('data', () => {
-      lastActivity = Date.now();
-    });
-    
-    // Check for inactivity every 5 seconds
-    const inactivityCheck = setInterval(() => {
-      if (Date.now() - lastActivity > 30000) { // 30 seconds of inactivity
-        console.error("Shutting down due to inactivity");
-        process.exit(0);
-      }
-    }, 5000);
-    
-    // Cleanup on exit
-    process.on('SIGTERM', () => {
-      clearInterval(inactivityCheck);
-      process.exit(0);
-    });
-    process.on('SIGINT', () => {
-      clearInterval(inactivityCheck);
-      process.exit(0);
-    });
-    
-    process.stdin.resume();
-  } else {
-    // Direct execution - use original approach
-    console.error("Running in direct execution mode");
-    process.stdin.on('end', () => {
-      process.exit(0);
-    });
-    
-    process.stdin.on('close', () => {
-      process.exit(0);
-    });
-    
-    await new Promise((resolve) => {
-      process.on('SIGTERM', resolve);
-      process.on('SIGINT', resolve);
-      process.stdin.resume();
-    });
-  }
 }
 
 // CLI mode: if two positional args are provided, run conversion and exit
@@ -101,23 +52,19 @@ const cliArgs = process.argv.slice(2).filter(Boolean);
 if (!process.env.MCP_SILENT) {
   console.error(`DEBUG: process.argv = ${JSON.stringify(process.argv)}`);
   console.error(`DEBUG: cliArgs = ${JSON.stringify(cliArgs)}`);
-  console.error(`DEBUG: cliArgs.length = ${cliArgs.length}`);
-  console.error(`DEBUG: process.stdin.isTTY = ${process.stdin.isTTY}`);
-  console.error(`DEBUG: npm environment = ${!!(process.env.npm_config_user_config || process.env.npm_execpath)}`);
 }
 
 // Check if this is a CLI invocation or MCP server mode
-const isCLI = cliArgs.length >= 2;
-const isNpmExecution = !!(process.env.npm_config_user_config || process.env.npm_execpath);
-const hasStdinTTY = process.stdin.isTTY;
-
-if (!process.env.MCP_SILENT) {
-  console.error(`DEBUG: isCLI=${isCLI}, isNpmExecution=${isNpmExecution}, hasStdinTTY=${hasStdinTTY}`);
-}
+// The server is the default. A 'convert' command is needed for CLI mode.
+const isCLI = cliArgs.length > 0 && cliArgs[0] === 'convert';
 
 if (isCLI) {
-  const inputPath = cliArgs[0];
-  const outputPath = cliArgs[1];
+  if (cliArgs.length < 3) {
+    console.error('Usage: node mcp-server.js convert <inputPath> <outputPath>');
+    process.exit(1);
+  }
+  const inputPath = cliArgs[1];
+  const outputPath = cliArgs[2];
   if (!process.env.MCP_SILENT) {
     console.error(`DEBUG: Running CLI mode: ${inputPath} -> ${outputPath}`);
   }

@@ -11,7 +11,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node mcp-server.js",
-    "convert": "node md_mermaid_to_pdf.js"
+    "convert": "node mcp-server.js convert"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.2.0",
