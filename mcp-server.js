@@ -102,9 +102,20 @@ if (!process.env.MCP_SILENT) {
   console.error(`DEBUG: process.argv = ${JSON.stringify(process.argv)}`);
   console.error(`DEBUG: cliArgs = ${JSON.stringify(cliArgs)}`);
   console.error(`DEBUG: cliArgs.length = ${cliArgs.length}`);
+  console.error(`DEBUG: process.stdin.isTTY = ${process.stdin.isTTY}`);
+  console.error(`DEBUG: npm environment = ${!!(process.env.npm_config_user_config || process.env.npm_execpath)}`);
 }
 
-if (cliArgs.length >= 2) {
+// Check if this is a CLI invocation or MCP server mode
+const isCLI = cliArgs.length >= 2;
+const isNpmExecution = !!(process.env.npm_config_user_config || process.env.npm_execpath);
+const hasStdinTTY = process.stdin.isTTY;
+
+if (!process.env.MCP_SILENT) {
+  console.error(`DEBUG: isCLI=${isCLI}, isNpmExecution=${isNpmExecution}, hasStdinTTY=${hasStdinTTY}`);
+}
+
+if (isCLI) {
   const inputPath = cliArgs[0];
   const outputPath = cliArgs[1];
   if (!process.env.MCP_SILENT) {
@@ -112,9 +123,14 @@ if (cliArgs.length >= 2) {
   }
   Promise.resolve()
     .then(() => convertMarkdownWithMermaidToPdf(inputPath, outputPath))
-    .then(() => process.exit(0))
+    .then(() => {
+      if (!process.env.MCP_SILENT) {
+        console.error('DEBUG: CLI conversion completed successfully');
+      }
+      process.exit(0);
+    })
     .catch((err) => {
-      console.error(err);
+      console.error('CLI conversion error:', err);
       process.exit(1);
     });
 } else {
@@ -122,7 +138,7 @@ if (cliArgs.length >= 2) {
     console.error(`DEBUG: Starting MCP server mode`);
   }
   start().catch((err) => {
-    console.error(err);
+    console.error('MCP server error:', err);
     process.exit(1);
   });
 }
