@@ -1,0 +1,22 @@
+{
+  "name": "md-to-pdf-with-mermaid-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "description": "MCP server that converts Markdown (with Mermaid) to PDF",
+  "main": "mcp-server.js",
+  "bin": {
+    "md-to-pdf-with-mermaid-mcp": "mcp-server.js"
+  },
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node mcp-server.js",
+    "convert": "node md_mermaid_to_pdf.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.2.0",
+    "zod": "^3.23.8"
+  }
+}
+
+
