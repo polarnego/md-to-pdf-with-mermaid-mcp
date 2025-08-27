@@ -43,9 +43,23 @@ async function start() {
   await server.connect(transport);
 }
 
-start().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// CLI mode: if two positional args are provided, run conversion and exit
+const cliArgs = process.argv.slice(2);
+if (cliArgs.length >= 2 && !cliArgs[0].startsWith('-')) {
+  const inputPath = cliArgs[0];
+  const outputPath = cliArgs[1];
+  Promise.resolve()
+    .then(() => convertMarkdownWithMermaidToPdf(inputPath, outputPath))
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+} else {
+  start().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
 
 
