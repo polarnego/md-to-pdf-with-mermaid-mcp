@@ -22,10 +22,10 @@ async function start() {
   server.tool(
     'convert_markdown_to_pdf',
     'Convert a Markdown file (with ```mermaid code blocks) to a PDF.',
-    {
+    z.object({
       inputPath: z.string().describe('Absolute path to input .md file'),
       outputPath: z.string().describe('Absolute path to output .pdf file'),
-    },
+    }),
     async ({ inputPath, outputPath }) => {
       if (!path.isAbsolute(inputPath) || !path.isAbsolute(outputPath)) {
         throw new Error('inputPath and outputPath must be absolute paths.');
